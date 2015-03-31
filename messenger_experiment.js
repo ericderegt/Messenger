@@ -9,6 +9,7 @@ var net = require('net'),
     fs = require('fs'),
     server = net.createServer(),
     loggedin = false,
+    currentUser;
     dataFile = JSON.parse(fs.readFileSync('./messages.json', 'utf8'));
 
 // messageLog writes data to json file
@@ -89,7 +90,6 @@ server.on('connection', function(client) { //'connection' listener
     client.on('data', function(input) {
         var userInput = input.trim().split(' ');
         var command = userInput[0];
-        var currentUser;
 
         if (loggedin === false) {
             switch (command) {
@@ -105,6 +105,7 @@ server.on('connection', function(client) { //'connection' listener
                     if (checkUser(userInput[1]) === true) {
                         loggedin = true;
                         currentUser = userInput[1];
+                        console.log(loggedin);
                         client.write("\nUser " + currentUser + " has logged in! \nEnter another command to continue: ");
                     }
                         break;
@@ -112,7 +113,6 @@ server.on('connection', function(client) { //'connection' listener
                     client.write("\nPlease create an account or login to continue!\n");
             }
         } else {
-// ***CONTROL FLOW FROM USER INPUT STARTS HERE***
             switch (command) {
                 case 'list':
                     client.write('\nUser List\n');
@@ -213,7 +213,7 @@ server.on('connection', function(client) { //'connection' listener
                     } else if (userInput[1] === 'messages' && userInput.length === 3) { // clear received messages 
                         var fromUser = userInput[2];
 
-                        if (checkUser(currentUser) === true && checkUser(fromUser) === true) {
+                        if (checkUser(fromUser) === true) {
                             clearMessage(currentUser,fromUser,"received");
                             client.write('\n Messages cleared. Enter another command: ');
                         }
